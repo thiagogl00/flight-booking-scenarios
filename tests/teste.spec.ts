@@ -21,15 +21,17 @@ test.describe('Search', () => {
 
     await page.getByTestId('flight-search').click();
     
+    await expect(page.getByTestId('flight-from')).toHaveClass(/is-invalid/);
+    await expect(page.getByTestId('flight-to')).toHaveClass(/is-invalid/);
+    await expect(page.getByTestId('flight-departure-date')).toHaveClass(/is-invalid/);
+    await expect(page.getByTestId('flight-return-date')).toHaveClass(/is-invalid/);
+
     await expect(page.getByText('Please select a departure city.', { exact: true })).toBeVisible();
     await expect(page.getByText('Please select a destination city.', { exact: false })).toBeVisible();
     await expect(page.getByText('Please select a departure date.', { exact: true })).toBeVisible();
     await expect(page.getByText('Please select a return date.', { exact: true })).toBeVisible();
 
-    await expect(page.getByTestId('flight-from')).toHaveClass(/is-invalid/);
-    await expect(page.getByTestId('flight-to')).toHaveClass(/is-invalid/);
-    await expect(page.getByTestId('flight-departure-date')).toHaveClass(/is-invalid/);
-    await expect(page.getByTestId('flight-return-date')).toHaveClass(/is-invalid/);
+
   });
 });
 
