@@ -33,6 +33,34 @@ test.describe('Search', () => {
 
 
   });
+
+  test('Origem e destino iguais não são permitidos', async ({ page }) => {
+    await page.goto('/flight-booking-scenarios');
+
+    await page.selectOption('[data-testid="flight-from"]', 'Paris');
+    await page.selectOption('[data-testid="flight-to"]', 'Paris');
+    await page.getByTestId('flight-departure-date').fill('2026-10-22');
+    await page.getByTestId('flight-return-date').fill('2026-10-29');
+    await page.getByTestId('flight-search').click();
+
+    await expect(page.getByTestId('flight-to')).toHaveClass(/is-invalid/);
+    await expect(page.getByText('Departure and destination cities cannot be the same.', { exact: true })).toBeVisible();
+
+  });
+
+  test('Data de ida é maior ou igual a da volta', async ({ page }) => {
+    await page.goto('/flight-booking-scenarios');
+
+    await page.selectOption('[data-testid="flight-from"]', 'Paris');
+    await page.selectOption('[data-testid="flight-to"]', 'London');
+    await page.getByTestId('flight-departure-date').fill('2026-10-29');
+    await page.getByTestId('flight-return-date').fill('2026-10-22');
+    await page.getByTestId('flight-search').click();
+
+    await expect(page.getByTestId('flight-return-date')).toHaveClass(/is-invalid/);
+    await expect(page.getByText('Return date must be after departure date.', { exact: true })).toBeVisible();
+
+  });
 });
 
 
