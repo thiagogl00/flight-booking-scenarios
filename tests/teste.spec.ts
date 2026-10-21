@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Search', () => {
+test.describe('Buscar voos', () => {
   test('Realiza uma busca válida', async ({ page }) => {
     await page.goto('/flight-booking-scenarios');
 
