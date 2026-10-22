@@ -8,6 +8,7 @@ test.describe('Reserva de voos', () => {
   test('Fluxo completo de Reserva de Voo', async ({ page }) => {
 
     await expect(page.locator('.badge').filter({ hasText: 'Search' })).toHaveClass(/bg-primary/);
+
     
     await page.selectOption('[data-testid="flight-from"]', 'Paris');
     await page.selectOption('[data-testid="flight-to"]', 'London');
@@ -36,15 +37,21 @@ test.describe('Reserva de voos', () => {
   });
 
   test('Data de ida é maior ou igual a da volta', async ({ page }) => {
-    
-    await page.selectOption('[data-testid="flight-from"]', 'Paris');
-    await page.selectOption('[data-testid="flight-to"]', 'London');
-    await page.getByTestId('flight-departure-date').fill('2026-10-29');
-    await page.getByTestId('flight-return-date').fill('2026-10-22');
-    await page.getByTestId('flight-search').click();
+    const listDate = [
+      { departureDate: '2026-10-22', returnDate: '2026-10-20' },
+      { departureDate: '2026-11-11', returnDate: '2026-11-11' },
+    ];
 
-    await expect(page.getByTestId('flight-return-date')).toHaveClass(/is-invalid/);
-    await expect(page.getByText('Return date must be after departure date.', { exact: true })).toBeVisible();
+    for (const { departureDate, returnDate } of listDate) {
+      await page.selectOption('[data-testid="flight-from"]', 'Paris');
+      await page.selectOption('[data-testid="flight-to"]', 'London');
+      await page.getByTestId('flight-departure-date').fill(departureDate);
+      await page.getByTestId('flight-return-date').fill(returnDate);
+      await page.getByTestId('flight-search').click();
+
+      await expect(page.getByTestId('flight-return-date')).toHaveClass(/is-invalid/);
+      await expect(page.getByText('Return date must be after departure date.', { exact: true })).toBeVisible();
+    }
   });
 
 });
