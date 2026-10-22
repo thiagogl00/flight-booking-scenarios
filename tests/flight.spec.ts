@@ -1,10 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Reserva de voos', () => {
-  test('Fluxo completo de Reserva de Voo', async ({ page }) => {
+  test.beforeEach( async ({ page })=>{
     await page.goto('/flight-booking-scenarios');
+  })
+
+  test('Fluxo completo de Reserva de Voo', async ({ page }) => {
 
     await expect(page.locator('.badge').filter({ hasText: 'Search' })).toHaveClass(/bg-primary/);
+    
     await page.selectOption('[data-testid="flight-from"]', 'Paris');
     await page.selectOption('[data-testid="flight-to"]', 'London');
     await page.getByTestId('flight-departure-date').fill('2026-10-22');
@@ -17,8 +21,7 @@ test.describe('Reserva de voos', () => {
   });
 
   test('Fluxo de pesquisa voo só de ida', async ({ page }) => {
-    await page.goto('/flight-booking-scenarios');
-
+    
     await expect(page.locator('.badge').filter({ hasText: 'Search' })).toHaveClass(/bg-primary/);
     await page.getByTestId('flight-one-way').click();
     
@@ -33,8 +36,7 @@ test.describe('Reserva de voos', () => {
   });
 
   test('Data de ida é maior ou igual a da volta', async ({ page }) => {
-    await page.goto('/flight-booking-scenarios');
-
+    
     await page.selectOption('[data-testid="flight-from"]', 'Paris');
     await page.selectOption('[data-testid="flight-to"]', 'London');
     await page.getByTestId('flight-departure-date').fill('2026-10-29');
