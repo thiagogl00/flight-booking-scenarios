@@ -12,13 +12,45 @@ test.describe('Reserva de voos', () => {
     
     await page.selectOption('[data-testid="flight-from"]', 'Paris');
     await page.selectOption('[data-testid="flight-to"]', 'London');
-    await page.getByTestId('flight-departure-date').fill('2026-10-22');
-    await page.getByTestId('flight-return-date').fill('2026-10-29');
-    await page.getByTestId('flight-passengers').fill('5');
+    await page.getByTestId('flight-departure-date').fill('2026-10-26');
+    await page.getByTestId('flight-return-date').fill('2026-11-01');
+    await page.getByTestId('flight-passengers').fill('1');
     await page.selectOption('[data-testid="flight-class"]', 'Business');
     await page.getByTestId('flight-search').click();
 
     await expect(page.locator('.badge').filter({ hasText: 'Search' })).toHaveClass(/bg-success/);
+    await expect(page.locator('.badge').filter({ hasText: 'Select flights' })).toHaveClass(/bg-primary/);
+   
+    await page.getByTestId('flight-select-AL248').click();
+    
+
+    await page.getByTestId('flight-select-BJ311').click();
+
+    await page.getByTestId('flight-continue-to-passengers').click();
+
+    await expect(page.locator('.badge').filter({ hasText: 'Select flights' })).toHaveClass(/bg-success/);
+    await expect(page.locator('.badge').filter({ hasText: 'Passengers' })).toHaveClass(/bg-primary/);
+
+    await page.getByTestId('flight-passenger-name').fill('Pedro Souza');
+    await page.getByTestId('flight-passenger-email').fill('pedrosouza@gmail.com');
+    await page.getByTestId('flight-passenger-phone').fill('91987261526');
+
+
+    await page.getByTestId('flight-continue-to-payment').click();
+
+    await expect(page.locator('.badge').filter({ hasText: 'Passengers' })).toHaveClass(/bg-success/);
+    await expect(page.locator('.badge').filter({ hasText: 'Payment' })).toHaveClass(/bg-primary/);
+
+    await page.getByTestId('flight-card-number').fill('5530 0061 9126 2505');
+    await page.getByTestId('flight-expiry').fill('02/2028');
+    await page.getByTestId('flight-cvv').fill('505');
+
+
+    await page.getByTestId('flight-book').click();
+
+    await expect(page.locator('.badge').filter({ hasText: 'Done' })).toHaveClass(/bg-primary/);
+   
+
   });
 
   test('Fluxo de pesquisa voo só de ida', async ({ page }) => {
