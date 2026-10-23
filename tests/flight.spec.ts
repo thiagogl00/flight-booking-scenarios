@@ -68,7 +68,7 @@ test.describe('Reserva de voos', () => {
     await expect(page.locator('.badge').filter({ hasText: 'Search' })).toHaveClass(/bg-success/);
   });
 
-  test('Data de ida é maior ou igual a da volta', async ({ page }) => {
+  test('Data de ida não pode ser maior ou igual a da volta', async ({ page }) => {
     const listDate = [
       { departureDate: '2026-10-22', returnDate: '2026-10-20' },
       { departureDate: '2026-11-11', returnDate: '2026-11-11' },
