@@ -4,7 +4,7 @@ test.describe("Reserva de voos", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/flight-booking-scenarios");
   });
-
+//Emerson
   test("Fluxo completo de Reserva de Voo", async ({ page }) => {
     await expect(
       page.locator(".badge").filter({ hasText: "Search" }),
@@ -63,7 +63,7 @@ test.describe("Reserva de voos", () => {
       page.locator(".badge").filter({ hasText: "Done" }),
     ).toHaveClass(/bg-primary/);
   });
-
+//Thiago
   test("Fluxo de pesquisa voo só de ida", async ({ page }) => {
     await expect(
       page.locator(".badge").filter({ hasText: "Search" }),
@@ -111,7 +111,7 @@ test.describe("Reserva de voos", () => {
       }),
     ).toBeVisible();
   });
-
+//Thiago
   test("Data de ida não pode ser maior ou igual a da volta", async ({
     page,
   }) => {
@@ -137,7 +137,7 @@ test.describe("Reserva de voos", () => {
       ).toBeVisible();
     }
   });
-
+//Franciele
   test("Exibir mensagens de erro com todos os campos vazios", async ({
     page,
   }) => {
