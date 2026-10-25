@@ -85,7 +85,38 @@ test.describe('Reserva de voos', () => {
       await expect(page.getByText('Return date must be after departure date.', { exact: true })).toBeVisible();
     }
   });
+  
+  test('Exibir mensagens de erro com todos os campos vazios', async ({ page }) => { 
 
+    // Garantir que os campos estejam vazios 
+    await page.getByTestId('flight-from').selectOption(''); 
+    await page.getByTestId('flight-to').selectOption(''); 
+    await page.getByTestId('flight-departure-date').fill(''); 
+    await page.getByTestId('flight-return-date').fill(''); 
+
+    // Clicar no botão de busca 
+    await page.getByTestId('flight-search').click(); 
+
+    // Validar mensagem de erro da origem 
+    await expect( 
+      page.getByText('Please select a departure city.', { exact: true }) 
+    ).toBeVisible(); 
+
+    // Validar mensagem de erro do destino 
+    await expect( 
+      page.getByText('Please select a destination city.', { exact: true }) 
+    ).toBeVisible(); 
+
+    // Validar mensagem de erro da data de ida 
+    await expect( 
+      page.getByText('Please select a departure date.', { exact: true }) 
+    ).toBeVisible(); 
+
+    // Validar mensagem de erro da data de volta 
+    await expect( 
+      page.getByText('Please select a return date.', { exact: true }) 
+    ).toBeVisible(); 
+  }); 
 });
 
 
