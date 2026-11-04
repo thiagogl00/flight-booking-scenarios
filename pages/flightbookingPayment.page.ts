@@ -1,6 +1,5 @@
 import { Page } from "@playwright/test";
 
-
 type PaymentData = {
     cardNumber: string;
     expiry: string;
