@@ -57,8 +57,8 @@ export class FlightBookingPage {
 		await this.page.getByTestId("flight-search").click();
 	}
 
-	async selectFlights(outboundTestId: string, returnTestId?: string) {
-		await this.page.getByTestId(outboundTestId).click();
+	async selectFlights(departureTestId: string, returnTestId?: string) {
+		await this.page.getByTestId(departureTestId).click();
 
 		if (returnTestId) {
 			await this.page.getByTestId(returnTestId).click();
