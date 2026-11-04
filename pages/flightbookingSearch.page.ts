@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-export type FlightSearchOptions = {
+type FlightSearchOptions = {
 	from: string;
 	to: string;
 	departureDate: string;

@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-export type PassengerData = {
+type PassengerData = {
 	name: string;
 	email: string;
 	phone: string;

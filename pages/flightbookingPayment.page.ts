@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
 
-export type PaymentData = {
+type PaymentData = {
     cardNumber: string;
     expiry: string;
     cvv: string;
