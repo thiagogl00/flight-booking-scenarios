@@ -10,18 +10,6 @@ export type FlightSearchOptions = {
 	oneWay?: boolean;
 };
 
-export type PassengerData = {
-	name: string;
-	email: string;
-	phone: string;
-};
-
-export type PaymentData = {
-	cardNumber: string;
-	expiry: string;
-	cvv: string;
-};
-
 export class FlightBookingPage {
     private readonly page: Page
 	constructor(page: Page) {
@@ -53,27 +41,4 @@ export class FlightBookingPage {
 		await this.page.getByTestId("flight-search").click();
 	}
 
-	async selectFlights(departureTestId: string, returnTestId?: string) {
-		await this.page.getByTestId(departureTestId).click();
-
-		if (returnTestId) {
-			await this.page.getByTestId(returnTestId).click();
-		}
-
-		await this.page.getByTestId("flight-continue-to-passengers").click();
-	}
-
-	async fillPassenger(data: PassengerData) {
-		await this.page.getByTestId("flight-passenger-name").fill(data.name);
-		await this.page.getByTestId("flight-passenger-email").fill(data.email);
-		await this.page.getByTestId("flight-passenger-phone").fill(data.phone);
-		await this.page.getByTestId("flight-continue-to-payment").click();
-	}
-
-	async fillPayment(data: PaymentData) {
-		await this.page.getByTestId("flight-card-number").fill(data.cardNumber);
-		await this.page.getByTestId("flight-expiry").fill(data.expiry);
-		await this.page.getByTestId("flight-cvv").fill(data.cvv);
-		await this.page.getByTestId("flight-book").click();
-	}
 }

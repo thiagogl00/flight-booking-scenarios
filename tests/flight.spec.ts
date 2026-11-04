@@ -1,5 +1,15 @@
-import { expect, test } from "@playwright/test";
-import { FlightBookingPage } from "../pages/flightbooking.page";
+import { expect, Page, test } from "@playwright/test";
+import { FlightBookingPage } from "../pages/flightbookingSearch.page";
+import { SelectPassengerPage } from "../pages/flightbookingSelect.page";
+import { PassengerPage } from "../pages/flightbookingPassenger.page";
+import { PaymentPage } from "../pages/flightbookingPayment.page";
+
+async function verify(page:Page, hasTextPrimary: string, hasTextSuccess?: string) {
+    hasTextSuccess?await expect(page.locator(".badge").filter({ hasText: hasTextSuccess }),)
+    .toHaveClass(/bg-success/): null;
+    await expect(page.locator(".badge").filter({ hasText: hasTextPrimary }),)
+    .toHaveClass(/bg-primary/);
+}
 
 test.describe("Reserva de voos", () => {
   test.beforeEach(async ({ page }) => {
@@ -8,10 +18,11 @@ test.describe("Reserva de voos", () => {
 //Emerson
   test("Fluxo completo de Reserva de Voo", async ({ page }) => {
     const flightBooking = new FlightBookingPage(page);
+    const selectPassenger = new SelectPassengerPage(page);
+    const passenger = new PassengerPage(page);
+    const payment = new PaymentPage(page);
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Search" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Search");
 
     await flightBooking.searchFlight({
       from: "Paris",
@@ -22,54 +33,41 @@ test.describe("Reserva de voos", () => {
       flightClass: "Business",
     });
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Search" }),
-    ).toHaveClass(/bg-success/);
-    await expect(
-      page.locator(".badge").filter({ hasText: "Select flights" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Select flights", "Search");
 
-    await flightBooking.selectFlights(
+    await selectPassenger.selectFlights(
       "flight-select-AL248",
       "flight-select-BJ311",
     );
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Select flights" }),
-    ).toHaveClass(/bg-success/);
-    await expect(
-      page.locator(".badge").filter({ hasText: "Passengers" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Passengers", "Select flights");
 
-    await flightBooking.fillPassenger({
+    await passenger.fillPassenger({
       name: "Pedro Souza",
       email: "pedrosouza@gmail.com",
       phone: "91987261526",
     });
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Passengers" }),
-    ).toHaveClass(/bg-success/);
-    await expect(
-      page.locator(".badge").filter({ hasText: "Payment" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Payment", "Passengers");
 
-    await flightBooking.fillPayment({
+    await payment.fillPayment({
       cardNumber: "5530 0061 9126 2505",
       expiry: "02/2028",
       cvv: "505",
     });
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Done" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Done");
+
   });
 //Thiago
   test("Fluxo de pesquisa voo só de ida", async ({ page }) => {
     const flightBooking = new FlightBookingPage(page);
+    const selectPassenger = new SelectPassengerPage(page);
+    const passenger = new PassengerPage(page);
+    const payment = new PaymentPage(page);
 
-    await expect(page.locator(".badge").filter({ hasText: "Search" }),)
-    .toHaveClass(/bg-primary/);
+    await verify(page, "Search");
+
 
     await flightBooking.searchFlight({
       from: "Paris",
@@ -80,42 +78,27 @@ test.describe("Reserva de voos", () => {
       oneWay: true,
     });
 
-    await expect(page.locator(".badge").filter({ hasText: "Search" }),)
-    .toHaveClass(/bg-success/);
-    await expect(page.locator(".badge").filter({ hasText: "Select flights" }),)
-    .toHaveClass(/bg-primary/);
+    await verify(page, "Select flights", "Search");
+    
+    await selectPassenger.selectFlights("flight-select-AL248");
 
-    await flightBooking.selectFlights("flight-select-AL248");
+    await verify(page, "Passengers", "Select flights");
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Select flights" }),
-    ).toHaveClass(/bg-success/);
-    await expect(
-      page.locator(".badge").filter({ hasText: "Passengers" }),
-    ).toHaveClass(/bg-primary/);
-
-    await flightBooking.fillPassenger({
+    await passenger.fillPassenger({
       name: "Pedro Souza",
       email: "pedrosouza@gmail.com",
       phone: "91987261526",
     });
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Passengers" }),
-    ).toHaveClass(/bg-success/);
-    await expect(
-      page.locator(".badge").filter({ hasText: "Payment" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Payment", "Passengers");
 
-    await flightBooking.fillPayment({
+    await payment.fillPayment({
       cardNumber: "5530 0061 9126 2505",
       expiry: "02/2028",
       cvv: "505",
     });
 
-    await expect(
-      page.locator(".badge").filter({ hasText: "Done" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Done");
   });
 
   // Matheus S
@@ -136,9 +119,8 @@ test.describe("Reserva de voos", () => {
     await page.getByTestId("flight-search").click();
 
     // 1. Verifica se a etapa de busca CONTINUA ATIVA (não avançou para sucesso)
-    await expect(
-      page.locator(".badge").filter({ hasText: "Search" }),
-    ).toHaveClass(/bg-primary/);
+    await verify(page, "Search");
+
 
     // 2. Valida se a mensagem de erro exata da tela apareceu
     await expect(
