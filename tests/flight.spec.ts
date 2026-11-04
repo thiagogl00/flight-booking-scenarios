@@ -1,12 +1,38 @@
-import { expect, test , Page} from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { FlightBookingPage } from "../pages/flightbooking.page";
 
-async function FlightBooking(page:Page, selectflights01:string,selectflights02?:string) {
-  await page.getByTestId("flight-select-AL248").click();
+test.describe("Reserva de voos", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/flight-booking-scenarios");
+  });
+//Emerson
+  test("Fluxo completo de Reserva de Voo", async ({ page }) => {
+    const flightBooking = new FlightBookingPage(page);
 
-    await page.getByTestId(selectflights01).click();
-    selectflights02? await page.getByTestId(selectflights02).click():null
+    await expect(
+      page.locator(".badge").filter({ hasText: "Search" }),
+    ).toHaveClass(/bg-primary/);
 
-    await page.getByTestId("flight-continue-to-passengers").click();
+    await flightBooking.searchFlight({
+      from: "Paris",
+      to: "London",
+      departureDate: "2026-10-26",
+      returnDate: "2026-11-01",
+      passengers: "1",
+      flightClass: "Business",
+    });
+
+    await expect(
+      page.locator(".badge").filter({ hasText: "Search" }),
+    ).toHaveClass(/bg-success/);
+    await expect(
+      page.locator(".badge").filter({ hasText: "Select flights" }),
+    ).toHaveClass(/bg-primary/);
+
+    await flightBooking.selectFlights(
+      "flight-select-AL248",
+      "flight-select-BJ311",
+    );
 
     await expect(
       page.locator(".badge").filter({ hasText: "Select flights" }),
@@ -15,13 +41,11 @@ async function FlightBooking(page:Page, selectflights01:string,selectflights02?:
       page.locator(".badge").filter({ hasText: "Passengers" }),
     ).toHaveClass(/bg-primary/);
 
-    await page.getByTestId("flight-passenger-name").fill("Pedro Souza");
-    await page
-      .getByTestId("flight-passenger-email")
-      .fill("pedrosouza@gmail.com");
-    await page.getByTestId("flight-passenger-phone").fill("91987261526");
-
-    await page.getByTestId("flight-continue-to-payment").click();
+    await flightBooking.fillPassenger({
+      name: "Pedro Souza",
+      email: "pedrosouza@gmail.com",
+      phone: "91987261526",
+    });
 
     await expect(
       page.locator(".badge").filter({ hasText: "Passengers" }),
@@ -30,63 +54,68 @@ async function FlightBooking(page:Page, selectflights01:string,selectflights02?:
       page.locator(".badge").filter({ hasText: "Payment" }),
     ).toHaveClass(/bg-primary/);
 
-    await page.getByTestId("flight-card-number").fill("5530 0061 9126 2505");
-    await page.getByTestId("flight-expiry").fill("02/2028");
-    await page.getByTestId("flight-cvv").fill("505");
-
-    await page.getByTestId("flight-book").click();
+    await flightBooking.fillPayment({
+      cardNumber: "5530 0061 9126 2505",
+      expiry: "02/2028",
+      cvv: "505",
+    });
 
     await expect(
       page.locator(".badge").filter({ hasText: "Done" }),
     ).toHaveClass(/bg-primary/);
-}
-
-test.describe("Reserva de voos", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/flight-booking-scenarios");
-  });
-//Emerson
-  test("Fluxo completo de Reserva de Voo", async ({ page }) => {
-    await expect(
-      page.locator(".badge").filter({ hasText: "Search" }),
-    ).toHaveClass(/bg-primary/);
-
-    await page.selectOption('[data-testid="flight-from"]', "Paris");
-    await page.selectOption('[data-testid="flight-to"]', "London");
-    await page.getByTestId("flight-departure-date").fill("2026-10-26");
-    await page.getByTestId("flight-return-date").fill("2026-11-01");
-    await page.getByTestId("flight-passengers").fill("1");
-    await page.selectOption('[data-testid="flight-class"]', "Business");
-    await page.getByTestId("flight-search").click();
-
-    await expect(
-      page.locator(".badge").filter({ hasText: "Search" }),
-    ).toHaveClass(/bg-success/);
-    await expect(
-      page.locator(".badge").filter({ hasText: "Select flights" }),
-    ).toHaveClass(/bg-primary/);
-
-    await FlightBooking(page,"flight-select-AL248","flight-select-BJ311")
   });
 //Thiago
   test("Fluxo de pesquisa voo só de ida", async ({ page }) => {
+    const flightBooking = new FlightBookingPage(page);
+
     await expect(page.locator(".badge").filter({ hasText: "Search" }),)
     .toHaveClass(/bg-primary/);
-    await page.getByTestId("flight-one-way").click();
 
-    await page.selectOption('[data-testid="flight-from"]', "Paris");
-    await page.selectOption('[data-testid="flight-to"]', "London");
-    await page.getByTestId("flight-departure-date").fill("2026-10-22");
-    await page.getByTestId("flight-passengers").fill("5");
-    await page.selectOption('[data-testid="flight-class"]', "Business");
-    await page.getByTestId("flight-search").click();
+    await flightBooking.searchFlight({
+      from: "Paris",
+      to: "London",
+      departureDate: "2026-11-22",
+      passengers: "5",
+      flightClass: "Business",
+      oneWay: true,
+    });
 
     await expect(page.locator(".badge").filter({ hasText: "Search" }),)
     .toHaveClass(/bg-success/);
     await expect(page.locator(".badge").filter({ hasText: "Select flights" }),)
     .toHaveClass(/bg-primary/);
 
-    await FlightBooking(page,"flight-select-AL248")
+    await flightBooking.selectFlights("flight-select-AL248");
+
+    await expect(
+      page.locator(".badge").filter({ hasText: "Select flights" }),
+    ).toHaveClass(/bg-success/);
+    await expect(
+      page.locator(".badge").filter({ hasText: "Passengers" }),
+    ).toHaveClass(/bg-primary/);
+
+    await flightBooking.fillPassenger({
+      name: "Pedro Souza",
+      email: "pedrosouza@gmail.com",
+      phone: "91987261526",
+    });
+
+    await expect(
+      page.locator(".badge").filter({ hasText: "Passengers" }),
+    ).toHaveClass(/bg-success/);
+    await expect(
+      page.locator(".badge").filter({ hasText: "Payment" }),
+    ).toHaveClass(/bg-primary/);
+
+    await flightBooking.fillPayment({
+      cardNumber: "5530 0061 9126 2505",
+      expiry: "02/2028",
+      cvv: "505",
+    });
+
+    await expect(
+      page.locator(".badge").filter({ hasText: "Done" }),
+    ).toHaveClass(/bg-primary/);
   });
 
   // Matheus S
