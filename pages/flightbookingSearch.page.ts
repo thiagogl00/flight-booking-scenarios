@@ -10,8 +10,9 @@ type FlightSearchOptions = {
 	oneWay?: boolean;
 };
 
-export class FlightBookingPage {
+export class SearchPage {
     private readonly page: Page
+
 	constructor(page: Page) {
 		this.page = page;
 	}
@@ -41,4 +42,65 @@ export class FlightBookingPage {
 		await this.page.getByTestId("flight-search").click();
 	}
 
+	async rejectDestinationSameAsOrigin() {
+		// Seleciona Paris como cidade de origem.
+		await this.page.selectOption('[data-testid="flight-from"]', "Paris");
+		// Seleciona Paris também como cidade de destino.
+		await this.page.selectOption('[data-testid="flight-to"]', "Paris");
+		// Preenche a data de ida.
+		await this.page.getByTestId("flight-departure-date").fill("2026-10-26");
+		// Preenche a data de volta.
+		await this.page.getByTestId("flight-return-date").fill("2026-11-01");
+		// Informa que viajará um passageiro.
+		await this.page.getByTestId("flight-passengers").fill("1");
+		// Seleciona a classe executiva.
+		await this.page.selectOption('[data-testid="flight-class"]', "Business");
+		// Aciona a busca de voos.
+		await this.page.getByTestId("flight-search").click();
+	}
+
+	async rejectReturnDateBeforeDepartureDate() {
+		// Seleciona Paris como cidade de origem.
+		await this.page.selectOption('[data-testid="flight-from"]', "Paris");
+		// Seleciona Londres como cidade de destino.
+		await this.page.selectOption('[data-testid="flight-to"]', "London");
+		// Preenche a data de ida.
+		await this.page.getByTestId("flight-departure-date").fill("2026-11-01");
+		// Preenche a data de volta com uma data anterior à de ida.
+		await this.page.getByTestId("flight-return-date").fill("2026-10-26");
+		// Informa que viajará um passageiro.
+		await this.page.getByTestId("flight-passengers").fill("1");
+		// Seleciona a classe executiva.
+		await this.page.selectOption('[data-testid="flight-class"]', "Business");
+		// Aciona a busca de voos.
+		await this.page.getByTestId("flight-search").click();
+	}
+
+	async rejectReturnDateEqualToDepartureDate() {
+		// Seleciona Paris como cidade de origem.
+		await this.page.selectOption('[data-testid="flight-from"]', "Paris");
+		// Seleciona Londres como cidade de destino.
+		await this.page.selectOption('[data-testid="flight-to"]', "London");
+		// Preenche a data de ida.
+		await this.page.getByTestId("flight-departure-date").fill("2026-11-01");
+		// Preenche a data de volta com a mesma data da ida.
+		await this.page.getByTestId("flight-return-date").fill("2026-11-01");
+		// Informa que viajará um passageiro.
+		await this.page.getByTestId("flight-passengers").fill("1");
+		// Seleciona a classe executiva.
+		await this.page.selectOption('[data-testid="flight-class"]', "Business");
+		// Aciona a busca de voos.
+		await this.page.getByTestId("flight-search").click();
+	}
+
+	async rejectEmptyFields() {
+		// Garantir que os campos estejam vazios
+		await this.page.getByTestId("flight-from").selectOption("");
+		await this.page.getByTestId("flight-to").selectOption("");
+		await this.page.getByTestId("flight-departure-date").fill("");
+		await this.page.getByTestId("flight-return-date").fill("");
+	
+		// Clicar no botão de busca
+		await this.page.getByTestId("flight-search").click();
+	}
 }
