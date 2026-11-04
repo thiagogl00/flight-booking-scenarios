@@ -28,10 +28,6 @@ export class FlightBookingPage {
 		this.page = page;
 	}
 
-	async goto() {
-		await this.page.goto("/flight-booking-scenarios");
-	}
-
 	async searchFlight(options: FlightSearchOptions) {
 		if (options.oneWay) {
 			await this.page.getByTestId("flight-one-way").click();
