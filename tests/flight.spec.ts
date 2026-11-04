@@ -109,7 +109,14 @@ test.describe("Reserva de voos", () => {
   // Matheus S
   test("Origem e destino iguais devem ser rejeitados", async ({ page }) => {
     // 1. Executa a função que preenche os campos de busca com origem e destino iguais
-    await search.rejectDestinationSameAsOrigin();
+    await search.rejectDestinationSameAsOrigin({
+      from: "Paris",
+      to: "Paris",
+      departureDate: "2026-10-26",
+      returnDate: "2026-11-26",
+      passengers: "1",
+      flightClass: "Business",
+    });
     
     // 2. Verifica se a etapa de busca CONTINUA ATIVA (não avançou para sucesso)
     await verify(page, "Search");
@@ -126,7 +133,14 @@ test.describe("Reserva de voos", () => {
     page,
   }) => {
     // Executa a função que preenche os campos de busca com a data de ida maior que a de volta
-    await search.rejectReturnDateBeforeDepartureDate();
+    await search.rejectReturnDateBeforeDepartureDate({
+      from: "Paris",
+      to: "London",
+      departureDate: "2026-11-01",
+      returnDate: "2026-10-01",
+      passengers: "1",
+      flightClass: "Business"
+    });
 
     await expect(page.getByTestId("flight-return-date")).toHaveClass(
       /is-invalid/,
@@ -138,7 +152,14 @@ test.describe("Reserva de voos", () => {
     ).toBeVisible();
 
     // Executa a função que preenche os campos de busca com a data de ida igual a da volta
-    await search.rejectReturnDateEqualToDepartureDate();
+    await search.rejectReturnDateEqualToDepartureDate({
+      from: "Paris",
+      to: "London",
+      departureDate: "2026-11-01",
+      returnDate: "2026-11-01",
+      passengers: "1",
+      flightClass: "Business"
+    });
 
     await expect(page.getByTestId("flight-return-date")).toHaveClass(
       /is-invalid/,
