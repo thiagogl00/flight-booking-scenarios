@@ -90,13 +90,19 @@ Tipo interno usado pelos métodos de busca e rejeição:
 
 #### Métodos
 
-- `searchFlight(options: FlightSearchOptions)`: preenche a busca, seleciona a opção de ida quando necessário e clica em `flight-search`.
-- `rejectDestinationSameAsOrigin(objects: FlightSearchOptions)`: envia origem e destino iguais para verificar a rejeição da aplicação.
-- `rejectReturnDateBeforeDepartureDate(objects: FlightSearchOptions)`: envia uma data de retorno anterior à data de ida.
-- `rejectReturnDateEqualToDepartureDate(objects: FlightSearchOptions)`: envia datas de ida e retorno iguais.
-- `rejectEmptyFields()`: envia o formulário sem origem, destino ou datas para validar as mensagens obrigatórias.
+| Método | Parâmetro | O que faz | Onde é usado |
+|---|---|---|---|
+| `searchFlight` | `options: FlightSearchOptions` | Seleciona o modo de viagem, preenche origem, destino, datas, passageiros e classe, e clica em `flight-search`. | Nos testes `Fluxo completo ida e volta` e `Fluxo completo só de ida`. |
+| `rejectDestinationSameAsOrigin` | `objects: FlightSearchOptions` | Preenche a busca com a mesma cidade em `from` e `to` e envia o formulário. | No teste `Origem e destino iguais devem ser rejeitados`. |
+| `rejectReturnDateBeforeDepartureDate` | `objects: FlightSearchOptions` | Preenche uma data de retorno anterior à data de ida e envia o formulário. | No primeiro caso do teste de datas inválidas. |
+| `rejectReturnDateEqualToDepartureDate` | `objects: FlightSearchOptions` | Preenche a mesma data para ida e retorno e envia o formulário. | No segundo caso do teste de datas inválidas. |
+| `rejectEmptyFields` | Nenhum | Limpa origem, destino e datas e envia o formulário vazio. | No teste `Exibir mensagens de erro com todos os campos vazios`. |
 
-Os quatro últimos métodos são usados pelos testes negativos do bloco `Search`. Eles executam a ação que provoca a validação; o teste continua responsável por verificar a mensagem, a classe do campo e a etapa ativa.
+`searchFlight` contém a regra específica de ida: quando `oneWay` é `true`, o método clica em `flight-one-way` e não preenche `returnDate`. Quando `oneWay` é falso ou não informado, ele preenche a data de retorno se `returnDate` existir.
+
+Os métodos `rejectDestinationSameAsOrigin`, `rejectReturnDateBeforeDepartureDate` e `rejectReturnDateEqualToDepartureDate` recebem o mesmo `FlightSearchOptions` porque precisam dos mesmos campos para montar a tentativa de busca. Eles não decidem se o cenário passou ou falhou: apenas reproduzem a ação do usuário. As asserções ficam em `flight.spec.ts`, onde são verificadas a mensagem, a classe `is-invalid` e a permanência na etapa `Search`.
+
+`rejectEmptyFields` é diferente dos demais porque não recebe um objeto: seu objetivo é garantir que os campos sejam enviados vazios, por isso ele próprio limpa os valores antes do clique.
 
 ### `SelectPassengerPage`
 
@@ -112,9 +118,15 @@ Representa a etapa de seleção dos voos.
 
 #### Método
 
-- `selectFlights(departureTestId: string, returnTestId?: string)`: seleciona o voo de ida; se `returnTestId` for informado, seleciona também o voo de volta; depois clica em `flight-continue-to-passengers`.
+`selectFlights(departureTestId: string, returnTestId?: string)` recebe os identificadores dos voos, em vez de conhecer quais voos o negócio deve escolher.
 
-O parâmetro opcional permite reutilizar a mesma classe para os dois cenários: ida e volta e somente ida.
+1. Clica no voo de ida usando `departureTestId`.
+2. Se `returnTestId` foi informado, clica também no voo de volta.
+3. Clica em `flight-continue-to-passengers` para avançar.
+
+No teste de ida e volta, a chamada fornece `flight-select-AL248` e `flight-select-BJ311`. No teste somente de ida, fornece apenas `flight-select-AL248`; como o segundo argumento é opcional, nenhum voo de retorno é selecionado.
+
+O método não valida se a etapa `Passengers` apareceu. Essa responsabilidade pertence ao teste, que chama `verify(page, "Passengers", "Select flights")` depois da ação.
 
 ### `PassengerPage`
 
@@ -132,7 +144,15 @@ Representa o preenchimento dos dados do passageiro.
 
 #### Atributo e método
 
-A classe possui o atributo `page: Page`. O método `fillPassenger(data: PassengerData)` recebe um objeto com os dados do passageiro, preenche `flight-passenger-name`, `flight-passenger-email` e `flight-passenger-phone`, e avança pelo botão `flight-continue-to-payment`.
+A classe possui o atributo `page: Page`, que permite acessar os campos da etapa atual. O método `fillPassenger(data: PassengerData)` usa cada propriedade do objeto para preencher um campo específico:
+
+| Propriedade | Seletor usado |
+|---|---|
+| `data.name` | `flight-passenger-name` |
+| `data.email` | `flight-passenger-email` |
+| `data.phone` | `flight-passenger-phone` |
+
+Depois do preenchimento, o método clica em `flight-continue-to-payment`. Nos dois fluxos completos, o teste chama esse método e em seguida verifica que `Payment` ficou ativa e `Passengers` ficou concluída.
 
 ### `PaymentPage`
 
@@ -150,7 +170,15 @@ Representa a etapa de pagamento e conclusão da reserva.
 
 #### Atributo e método
 
-A classe possui o atributo `page: Page`. O método `fillPayment(data: PaymentData)` recebe um objeto do tipo `PaymentData`, preenche `flight-card-number`, `flight-expiry` e `flight-cvv`, e finaliza pelo botão `flight-book`.
+A classe possui o atributo `page: Page`. O método `fillPayment(data: PaymentData)` usa cada propriedade do objeto para preencher o formulário:
+
+| Propriedade | Seletor usado |
+|---|---|
+| `data.cardNumber` | `flight-card-number` |
+| `data.expiry` | `flight-expiry` |
+| `data.cvv` | `flight-cvv` |
+
+Por fim, clica em `flight-book`. O método encerra a interação com a tela de pagamento; quem confirma que a reserva terminou é o teste, por meio de `verify(page, "Done")`.
 
 ## Testes
 
@@ -164,6 +192,19 @@ O `test.beforeEach` principal prepara cada teste:
 2. Cria uma instância de `SearchPage`.
 
 O `beforeEach` do bloco `Fluxo completo` também cria `SelectPassengerPage`, `PassengerPage` e `PaymentPage`. Todas recebem a mesma instância `page` fornecida pelo Playwright. Isso permite que as classes atuem na mesma aba e na mesma reserva enquanto o teste avança pelas etapas.
+
+### Importações e responsabilidades no teste
+
+No início de `flight.spec.ts`, cada classe é importada do arquivo correspondente em `pages/`. O teste usa esses imports para criar objetos de interação:
+
+| Objeto no teste | Classe | Responsabilidade |
+|---|---|---|
+| `search` | `SearchPage` | Iniciar uma busca válida ou provocar uma validação da etapa `Search`. |
+| `selectPassenger` | `SelectPassengerPage` | Escolher o voo ou voos e avançar para `Passengers`. |
+| `passenger` | `PassengerPage` | Informar os dados do passageiro e avançar para `Payment`. |
+| `payment` | `PaymentPage` | Informar o pagamento e concluir a reserva. |
+
+O teste mantém os objetos Page Object em variáveis separadas porque cada um representa uma responsabilidade de negócio. A navegação entre telas acontece como efeito dos métodos chamados, mas a verificação do avanço continua no teste.
 
 ### Onde cada type é usado
 
@@ -188,6 +229,24 @@ await search.searchFlight({
 
 Nesse caso, o objeto atende ao contrato `FlightSearchOptions`; `SearchPage` usa cada propriedade para preencher um campo, e `flight.spec.ts` verifica se a aplicação avançou para `Select flights`.
 
+Nos outros passos, o mesmo padrão se repete:
+
+```ts
+await passenger.fillPassenger({
+    name: "Pedro Souza",
+    email: "pedrosouza@gmail.com",
+    phone: "91987261526",
+});
+
+await payment.fillPayment({
+    cardNumber: "5530 0061 9126 2505",
+    expiry: "02/2028",
+    cvv: "505",
+});
+```
+
+`PassengerData` e `PaymentData` são tipos locais dos respectivos arquivos. Eles não são importados pelo teste porque o TypeScript infere o tipo a partir do método chamado: o objeto passado para `fillPassenger` precisa seguir `PassengerData`, e o objeto passado para `fillPayment` precisa seguir `PaymentData`.
+
 ### Fluxo completo: ida e volta
 
 O teste `Fluxo completo ida e volta` valida a sequência:
@@ -211,6 +270,20 @@ O bloco `Search` verifica comportamentos inválidos sem avançar para a próxima
 - **Origem e destino iguais:** espera a mensagem `Departure and destination cities cannot be the same.` e confirma que `Search` continua ativa.
 - **Retorno anterior ou igual à ida:** confirma que `flight-return-date` recebe a classe `is-invalid` e que a mensagem `Return date must be after departure date.` aparece nos dois casos.
 - **Campos vazios:** confirma as mensagens obrigatórias de origem, destino, data de ida e data de volta.
+
+No teste de datas inválidas, `rejectReturnDateBeforeDepartureDate` e `rejectReturnDateEqualToDepartureDate` são chamados em sequência dentro do mesmo teste. Primeiro é validado o retorno anterior à ida; depois os mesmos campos são preenchidos novamente com datas iguais e a regra é validada outra vez. Isso demonstra que os métodos da Page Object podem ser reutilizados para mais de uma variação de entrada, enquanto o teste concentra as expectativas de cada caso.
+
+## Relação entre `pages/` e `tests/`
+
+Os arquivos têm papéis complementares:
+
+| Camada | Pergunta que responde | Exemplo |
+|---|---|---|
+| `pages/` | Como interagir com a tela? | Qual `data-testid` deve ser preenchido ou clicado? |
+| `types` em `pages/` | Quais dados são necessários para a interação? | Uma busca precisa de origem, destino, datas, passageiros e classe. |
+| `tests/` | Qual comportamento deve ser comprovado? | Após enviar a busca, a etapa seguinte fica ativa? A mensagem de erro aparece? |
+
+Assim, uma mudança de seletor tende a ficar restrita ao Page Object, enquanto uma mudança na regra esperada ou na mensagem validada pertence ao arquivo de teste. Os testes não acessam diretamente os campos de busca nos fluxos principais; eles chamam métodos como `searchFlight`, `selectFlights`, `fillPassenger` e `fillPayment`.
 
 ## Observações
 
