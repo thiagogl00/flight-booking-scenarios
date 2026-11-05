@@ -48,9 +48,11 @@ export class SearchPage {
 		// Seleciona Paris também como cidade de destino.
 		await this.page.selectOption('[data-testid="flight-to"]', objects.to);
 		// Preenche a data de ida.
-		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate || "2026-10-26");
+		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate);
 		// Preenche a data de volta.
-		await this.page.getByTestId("flight-return-date").fill(objects.returnDate || "2026-11-26");
+		if(objects.returnDate){
+			await this.page.getByTestId("flight-return-date").fill(objects.returnDate);
+		}
 		// Informa que viajará um passageiro.
 		await this.page.getByTestId("flight-passengers").fill(objects.passengers);
 		// Seleciona a classe executiva.
@@ -65,9 +67,11 @@ export class SearchPage {
 		// Seleciona Londres como cidade de destino.
 		await this.page.selectOption('[data-testid="flight-to"]', objects.to);
 		// Preenche a data de ida.
-		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate || "2026-11-01");
+		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate);
 		// Preenche a data de volta com uma data anterior à de ida.
-		await this.page.getByTestId("flight-return-date").fill(objects.returnDate || "2026-10-01");
+		if(objects.returnDate){
+			await this.page.getByTestId("flight-return-date").fill(objects.returnDate);
+		}
 		// Informa que viajará um passageiro.
 		await this.page.getByTestId("flight-passengers").fill(objects.passengers);
 		// Seleciona a classe executiva.
@@ -82,9 +86,11 @@ export class SearchPage {
 		// Seleciona Londres como cidade de destino.
 		await this.page.selectOption('[data-testid="flight-to"]', objects.to);
 		// Preenche a data de ida.
-		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate || "2026-11-01");
+		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate);
 		// Preenche a data de volta com a mesma data da ida.
-		await this.page.getByTestId("flight-return-date").fill(objects.returnDate || "2026-11-01");
+		if(objects.returnDate){
+			await this.page.getByTestId("flight-return-date").fill(objects.returnDate);
+		}
 		// Informa que viajará um passageiro.
 		await this.page.getByTestId("flight-passengers").fill(objects.passengers);
 		// Seleciona a classe executiva.
