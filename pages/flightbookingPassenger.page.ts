@@ -7,7 +7,7 @@ type PassengerData = {
 };
 
 export class PassengerPage {
-    private readonly page: Page
+    readonly page: Page
 
     constructor(page: Page) {
         this.page = page;

@@ -11,7 +11,7 @@ type FlightSearchOptions = {
 };
 
 export class SearchPage {
-    private readonly page: Page
+    readonly page: Page
 
 	constructor(page: Page) {
 		this.page = page;
