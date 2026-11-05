@@ -10,102 +10,109 @@ async function verify(page:Page, hasTextPrimary: string, hasTextSuccess?: string
     .toHaveClass(/bg-success/);
   }
 
-    await expect(page.locator(".badge").filter({ hasText: hasTextPrimary }),)
-    .toHaveClass(/bg-primary/);
+  await expect(page.locator(".badge").filter({ hasText: hasTextPrimary }),)
+  .toHaveClass(/bg-primary/);
 }
 
-test.describe("Reserva de voos", () => {
-  let search: SearchPage;
+let search: SearchPage;
 
-  test.beforeEach(async ({ page }) => {
+test.beforeEach( async ({ page }) => {
     await page.goto("/flight-booking-scenarios");
     search = new SearchPage(page);
+});
+
+test.describe("Fluxo completo", () => {
+
+  let selectPassenger: SelectPassengerPage;
+  let passenger: PassengerPage;
+  let payment: PaymentPage;
+
+  test.beforeEach(async ({ page }) => {
+      selectPassenger = new SelectPassengerPage(page);
+      passenger = new PassengerPage(page);
+      payment = new PaymentPage(page);
   });
-  test.describe("Fluxo completo", () => {
-      let selectPassenger: SelectPassengerPage;
-      let passenger: PassengerPage;
-      let payment: PaymentPage;
-    test.beforeEach(async ({ page }) => {
-        selectPassenger = new SelectPassengerPage(page);
-        passenger = new PassengerPage(page);
-        payment = new PaymentPage(page);
+
+  //Emerson
+  test("Fluxo completo ida e volta", async ({ page }) => {
+    await verify(page, "Search");
+
+    await search.searchFlight({
+      from: "Paris",
+      to: "London",
+      departureDate: "2026-10-26",
+      returnDate: "2026-11-01",
+      passengers: "1",
+      flightClass: "Business",
     });
-      //Emerson
-    test("Fluxo completo ida e volta", async ({ page }) => {
-      await verify(page, "Search");
 
-      await search.searchFlight({
-        from: "Paris",
-        to: "London",
-        departureDate: "2026-10-26",
-        returnDate: "2026-11-01",
-        passengers: "1",
-        flightClass: "Business",
-      });
+    await verify(page, "Select flights", "Search");
 
-      await verify(page, "Select flights", "Search");
+    await selectPassenger.selectFlights(
+      "flight-select-AL248",
+      "flight-select-BJ311",
+    );
 
-      await selectPassenger.selectFlights(
-        "flight-select-AL248",
-        "flight-select-BJ311",
-      );
+    await verify(page, "Passengers", "Select flights");
 
-      await verify(page, "Passengers", "Select flights");
-
-      await passenger.fillPassenger({
-        name: "Pedro Souza",
-        email: "pedrosouza@gmail.com",
-        phone: "91987261526",
-      });
-
-      await verify(page, "Payment", "Passengers");
-
-      await payment.fillPayment({
-        cardNumber: "5530 0061 9126 2505",
-        expiry: "02/2028",
-        cvv: "505",
-      });
-
-      await verify(page, "Done");
-
+    await passenger.fillPassenger({
+      name: "Pedro Souza",
+      email: "pedrosouza@gmail.com",
+      phone: "91987261526",
     });
+
+    await verify(page, "Payment", "Passengers");
+
+    await payment.fillPayment({
+      cardNumber: "5530 0061 9126 2505",
+      expiry: "02/2028",
+      cvv: "505",
+    });
+
+    await verify(page, "Done");
+
+  });
+
   //Thiago
-    test("Fluxo completo só de ida", async ({ page }) => {
-      await verify(page, "Search");
+  test("Fluxo completo só de ida", async ({ page }) => {
+    await verify(page, "Search");
       
-      await search.searchFlight({
-        from: "Paris",
-        to: "London",
-        departureDate: "2026-11-22",
-        passengers: "5",
-        flightClass: "Business",
-        oneWay: true,
-      });
-
-      await verify(page, "Select flights", "Search");
-      
-      await selectPassenger.selectFlights("flight-select-AL248");
-
-      await verify(page, "Passengers", "Select flights");
-
-      await passenger.fillPassenger({
-        name: "Pedro Souza",
-        email: "pedrosouza@gmail.com",
-        phone: "91987261526",
-      });
-
-      await verify(page, "Payment", "Passengers");
-
-      await payment.fillPayment({
-        cardNumber: "5530 0061 9126 2505",
-        expiry: "02/2028",
-        cvv: "505",
-      });
-
-      await verify(page, "Done");
+    await search.searchFlight({
+      from: "Paris",
+      to: "London",
+      departureDate: "2026-11-22",
+      passengers: "5",
+      flightClass: "Business",
+      oneWay: true,
     });
 
+    await verify(page, "Select flights", "Search");
+      
+    await selectPassenger.selectFlights("flight-select-AL248");
+
+    await verify(page, "Passengers", "Select flights");
+
+    await passenger.fillPassenger({
+      name: "Pedro Souza",
+      email: "pedrosouza@gmail.com",
+      phone: "91987261526",
+    });
+
+    await verify(page, "Payment", "Passengers");
+
+    await payment.fillPayment({
+      cardNumber: "5530 0061 9126 2505",
+      expiry: "02/2028",
+      cvv: "505",
+    });
+
+    await verify(page, "Done");
   });
+
+});
+
+test.describe("Search", () => {
+
   // Matheus S
   test("Origem e destino iguais devem ser rejeitados", async ({ page }) => {
     // 1. Executa a função que preenche os campos de busca com origem e destino iguais
@@ -122,16 +129,11 @@ test.describe("Reserva de voos", () => {
     await verify(page, "Search");
 
     // 3. Valida se a mensagem de erro exata da tela apareceu
-    await expect(
-      page.getByText("Departure and destination cities cannot be the same.", {
-        exact: true,
-      }),
-    ).toBeVisible();
+    await expect(page.getByText("Departure and destination cities cannot be the same.", {exact: true})).toBeVisible();
   });
+
 //Thiago
-  test("Data de ida não pode ser maior ou igual a da volta", async ({
-    page,
-  }) => {
+  test("Data de ida não pode ser maior ou igual a da volta", async ({ page }) => {
     // Executa a função que preenche os campos de busca com a data de ida maior que a de volta
     await search.rejectReturnDateBeforeDepartureDate({
       from: "Paris",
@@ -142,14 +144,8 @@ test.describe("Reserva de voos", () => {
       flightClass: "Business"
     });
 
-    await expect(page.getByTestId("flight-return-date")).toHaveClass(
-      /is-invalid/,
-    );
-    await expect(
-      page.getByText("Return date must be after departure date.", {
-        exact: true,
-      }),
-    ).toBeVisible();
+    await expect(page.getByTestId("flight-return-date")).toHaveClass(/is-invalid/);
+    await expect(page.getByText("Return date must be after departure date.", {exact: true})).toBeVisible();
 
     // Executa a função que preenche os campos de busca com a data de ida igual a da volta
     await search.rejectReturnDateEqualToDepartureDate({
@@ -161,40 +157,26 @@ test.describe("Reserva de voos", () => {
       flightClass: "Business"
     });
 
-    await expect(page.getByTestId("flight-return-date")).toHaveClass(
-      /is-invalid/,
-    );
-    await expect(
-      page.getByText("Return date must be after departure date.", {
-        exact: true,
-      }),
-    ).toBeVisible();
+    await expect(page.getByTestId("flight-return-date")).toHaveClass(/is-invalid/);
+    await expect(page.getByText("Return date must be after departure date.", {exact: true})).toBeVisible();
   });
+
 //Franciele
-  test("Exibir mensagens de erro com todos os campos vazios", async ({
-    page,
-  }) => {
+  test("Exibir mensagens de erro com todos os campos vazios", async ({ page }) => {
     // Executa a função que preenche os campos de busca com todos os campos vazios
     await search.rejectEmptyFields();
 
     // Validar mensagem de erro da origem
-    await expect(
-      page.getByText("Please select a departure city.", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByText("Please select a departure city.", { exact: true })).toBeVisible();
 
     // Validar mensagem de erro do destino
-    await expect(
-      page.getByText("Please select a destination city.", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByText("Please select a destination city.", { exact: true })).toBeVisible();
 
     // Validar mensagem de erro da data de ida
-    await expect(
-      page.getByText("Please select a departure date.", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByText("Please select a departure date.", { exact: true })).toBeVisible();
 
     // Validar mensagem de erro da data de volta
-    await expect(
-      page.getByText("Please select a return date.", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByText("Please select a return date.", { exact: true })).toBeVisible();
   });
+
 });
