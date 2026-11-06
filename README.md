@@ -93,16 +93,13 @@ Tipo interno usado pelos métodos de busca e rejeição:
 | Método | Parâmetro | O que faz | Onde é usado |
 |---|---|---|---|
 | `searchFlight` | `options: FlightSearchOptions` | Seleciona o modo de viagem, preenche origem, destino, datas, passageiros e classe, e clica em `flight-search`. | Nos testes `Fluxo completo ida e volta` e `Fluxo completo só de ida`. |
-| `rejectDestinationSameAsOrigin` | `objects: FlightSearchOptions` | Preenche a busca com a mesma cidade em `from` e `to` e envia o formulário. | No teste `Origem e destino iguais devem ser rejeitados`. |
-| `rejectReturnDateBeforeDepartureDate` | `objects: FlightSearchOptions` | Preenche uma data de retorno anterior à data de ida e envia o formulário. | No primeiro caso do teste de datas inválidas. |
-| `rejectReturnDateEqualToDepartureDate` | `objects: FlightSearchOptions` | Preenche a mesma data para ida e retorno e envia o formulário. | No segundo caso do teste de datas inválidas. |
-| `rejectEmptyFields` | Nenhum | Limpa origem, destino e datas e envia o formulário vazio. | No teste `Exibir mensagens de erro com todos os campos vazios`. |
+| `reject` | `object: FlightSearchOptions` | Preenche os dados informados e envia o formulário para reproduzir cenários de validação. | Nos testes de validação do bloco `Search`. |
 
 `searchFlight` contém a regra específica de ida: quando `oneWay` é `true`, o método clica em `flight-one-way` e não preenche `returnDate`. Quando `oneWay` é falso ou não informado, ele preenche a data de retorno se `returnDate` existir.
 
-Os métodos `rejectDestinationSameAsOrigin`, `rejectReturnDateBeforeDepartureDate` e `rejectReturnDateEqualToDepartureDate` recebem o mesmo `FlightSearchOptions` porque precisam dos mesmos campos para montar a tentativa de busca. Eles não decidem se o cenário passou ou falhou: apenas reproduzem a ação do usuário. As asserções ficam em `flight.spec.ts`, onde são verificadas a mensagem, a classe `is-invalid` e a permanência na etapa `Search`.
+O método `reject` recebe `FlightSearchOptions` e é reutilizado para os cenários de origem e destino iguais, datas inválidas e campos vazios. Ele não decide se o cenário passou ou falhou: apenas reproduz a ação do usuário. As asserções ficam em `flight.spec.ts`, onde são verificadas as mensagens, a classe `is-invalid` e a permanência na etapa `Search`.
 
-`rejectEmptyFields` é diferente dos demais porque não recebe um objeto: seu objetivo é garantir que os campos sejam enviados vazios, por isso ele próprio limpa os valores antes do clique.
+Para o cenário de campos vazios, o teste envia strings vazias em `from`, `to`, `departureDate` e `returnDate` ao chamar `reject`. O método preenche os valores recebidos, mantém passageiros e classe informados e clica em `flight-search`.
 
 ### `SelectPassengerPage`
 
@@ -210,7 +207,7 @@ O teste mantém os objetos Page Object em variáveis separadas porque cada um re
 
 | Type | Declarado em | Recebido por | Aplicação nos testes |
 |---|---|---|---|
-| `FlightSearchOptions` | `flightbookingSearch.page.ts` | `searchFlight` e métodos de rejeição | Configura os cenários de ida e volta, somente ida e validações da busca. |
+| `FlightSearchOptions` | `flightbookingSearch.page.ts` | `searchFlight` e `reject` | Configura os cenários de ida e volta, somente ida e validações da busca. |
 | `PassengerData` | `flightbookingPassenger.page.ts` | `fillPassenger` | Fornece nome, e-mail e telefone nos dois fluxos completos. |
 | `PaymentData` | `flightbookingPayment.page.ts` | `fillPayment` | Fornece cartão, validade e CVV antes da conclusão da reserva. |
 
@@ -271,7 +268,7 @@ O bloco `Search` verifica comportamentos inválidos sem avançar para a próxima
 - **Retorno anterior ou igual à ida:** confirma que `flight-return-date` recebe a classe `is-invalid` e que a mensagem `Return date must be after departure date.` aparece nos dois casos.
 - **Campos vazios:** confirma as mensagens obrigatórias de origem, destino, data de ida e data de volta.
 
-No teste de datas inválidas, `rejectReturnDateBeforeDepartureDate` e `rejectReturnDateEqualToDepartureDate` são chamados em sequência dentro do mesmo teste. Primeiro é validado o retorno anterior à ida; depois os mesmos campos são preenchidos novamente com datas iguais e a regra é validada outra vez. Isso demonstra que os métodos da Page Object podem ser reutilizados para mais de uma variação de entrada, enquanto o teste concentra as expectativas de cada caso.
+No teste de datas inválidas, `reject` é chamado em sequência dentro do mesmo teste. Primeiro é validado o retorno anterior à ida; depois os mesmos campos são preenchidos novamente com datas iguais e a regra é validada outra vez. Isso demonstra que o método da Page Object pode ser reutilizado para mais de uma variação de entrada, enquanto o teste concentra as expectativas de cada caso.
 
 ## Relação entre `pages/` e `tests/`
 
