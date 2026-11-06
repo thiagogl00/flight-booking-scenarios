@@ -115,8 +115,8 @@ test.describe("Search", () => {
 
   // Matheus S
   test("Origem e destino iguais devem ser rejeitados", async ({ page }) => {
-    // 1. Executa a função que preenche os campos de busca com origem e destino iguais
-    await search.rejectDestinationSameAsOrigin({
+    // 1. Preenche os campos de busca com origem e destino iguais
+    await search.reject({
       from: "Paris",
       to: "Paris",
       departureDate: "2026-10-26",
@@ -134,8 +134,8 @@ test.describe("Search", () => {
 
 //Thiago
   test("Data de ida não pode ser maior ou igual a da volta", async ({ page }) => {
-    // Executa a função que preenche os campos de busca com a data de ida maior que a de volta
-    await search.rejectReturnDateBeforeDepartureDate({
+    // preenche os campos de busca com a data de ida maior que a de volta
+    await search.reject({
       from: "Paris",
       to: "London",
       departureDate: "2026-11-01",
@@ -147,8 +147,8 @@ test.describe("Search", () => {
     await expect(page.getByTestId("flight-return-date")).toHaveClass(/is-invalid/);
     await expect(page.getByText("Return date must be after departure date.", {exact: true})).toBeVisible();
 
-    // Executa a função que preenche os campos de busca com a data de ida igual a da volta
-    await search.rejectReturnDateEqualToDepartureDate({
+    // preenche os campos de busca com a data de ida igual a da volta
+    await search.reject({
       from: "Paris",
       to: "London",
       departureDate: "2026-11-01",
@@ -163,8 +163,15 @@ test.describe("Search", () => {
 
 //Franciele
   test("Exibir mensagens de erro com todos os campos vazios", async ({ page }) => {
-    // Executa a função que preenche os campos de busca com todos os campos vazios
-    await search.rejectEmptyFields();
+    // preenche os campos de busca com todos os campos vazios
+    await search.reject({
+      from: "",
+      to: "",
+      departureDate: "",
+      returnDate: "",
+      passengers: "1",
+      flightClass: "Business"
+    });
 
     // Validar mensagem de erro da origem
     await expect(page.getByText("Please select a departure city.", { exact: true })).toBeVisible();

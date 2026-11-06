@@ -42,71 +42,22 @@ export class SearchPage {
 		await this.page.getByTestId("flight-search").click();
 	}
 
-	async rejectDestinationSameAsOrigin(objects: FlightSearchOptions) {
-		// Seleciona Paris como cidade de origem.
-		await this.page.selectOption('[data-testid="flight-from"]', objects.from);
-		// Seleciona Paris também como cidade de destino.
-		await this.page.selectOption('[data-testid="flight-to"]', objects.to);
-		// Preenche a data de ida.
-		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate);
-		// Preenche a data de volta.
-		if(objects.returnDate){
-			await this.page.getByTestId("flight-return-date").fill(objects.returnDate);
+	async reject(object: FlightSearchOptions) {
+		await this.page.selectOption('[data-testid="flight-from"]', object.from);
+
+		await this.page.selectOption('[data-testid="flight-to"]', object.to);
+
+		await this.page.getByTestId("flight-departure-date").fill(object.departureDate);
+
+		if(object.returnDate){
+			await this.page.getByTestId("flight-return-date").fill(object.returnDate);
 		}
-		// Informa que viajará um passageiro.
-		await this.page.getByTestId("flight-passengers").fill(objects.passengers);
-		// Seleciona a classe executiva.
-		await this.page.selectOption('[data-testid="flight-class"]', objects.flightClass);
-		// Aciona a busca de voos.
+
+		await this.page.getByTestId("flight-passengers").fill(object.passengers);
+
+		await this.page.selectOption('[data-testid="flight-class"]', object.flightClass);
+
 		await this.page.getByTestId("flight-search").click();
 	}
 
-	async rejectReturnDateBeforeDepartureDate(objects: FlightSearchOptions) {
-		// Seleciona Paris como cidade de origem.
-		await this.page.selectOption('[data-testid="flight-from"]', objects.from);
-		// Seleciona Londres como cidade de destino.
-		await this.page.selectOption('[data-testid="flight-to"]', objects.to);
-		// Preenche a data de ida.
-		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate);
-		// Preenche a data de volta com uma data anterior à de ida.
-		if(objects.returnDate){
-			await this.page.getByTestId("flight-return-date").fill(objects.returnDate);
-		}
-		// Informa que viajará um passageiro.
-		await this.page.getByTestId("flight-passengers").fill(objects.passengers);
-		// Seleciona a classe executiva.
-		await this.page.selectOption('[data-testid="flight-class"]', objects.flightClass);
-		// Aciona a busca de voos.
-		await this.page.getByTestId("flight-search").click();
-	}
-
-	async rejectReturnDateEqualToDepartureDate(objects: FlightSearchOptions) {
-		// Seleciona Paris como cidade de origem.
-		await this.page.selectOption('[data-testid="flight-from"]', objects.from);
-		// Seleciona Londres como cidade de destino.
-		await this.page.selectOption('[data-testid="flight-to"]', objects.to);
-		// Preenche a data de ida.
-		await this.page.getByTestId("flight-departure-date").fill(objects.departureDate);
-		// Preenche a data de volta com a mesma data da ida.
-		if(objects.returnDate){
-			await this.page.getByTestId("flight-return-date").fill(objects.returnDate);
-		}
-		// Informa que viajará um passageiro.
-		await this.page.getByTestId("flight-passengers").fill(objects.passengers);
-		// Seleciona a classe executiva.
-		await this.page.selectOption('[data-testid="flight-class"]', objects.flightClass);
-		// Aciona a busca de voos.
-		await this.page.getByTestId("flight-search").click();
-	}
-
-	async rejectEmptyFields() {
-		// Garantir que os campos estejam vazios
-		await this.page.getByTestId("flight-from").selectOption("");
-		await this.page.getByTestId("flight-to").selectOption("");
-		await this.page.getByTestId("flight-departure-date").fill("");
-		await this.page.getByTestId("flight-return-date").fill("");
-	
-		// Clicar no botão de busca
-		await this.page.getByTestId("flight-search").click();
-	}
 }
