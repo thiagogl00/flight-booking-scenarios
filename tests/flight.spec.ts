@@ -5,13 +5,11 @@ import { PassengerPage } from "../pages/flightbookingPassenger.page";
 import { PaymentPage } from "../pages/flightbookingPayment.page";
 
 async function verify(page:Page, hasTextPrimary: string, hasTextSuccess?: string) {
-  if (hasTextSuccess) {
-    await expect(page.locator(".badge").filter({ hasText: hasTextSuccess }),)
-    .toHaveClass(/bg-success/);
-  }
+  await expect(page.locator(".badge").filter({ hasText: hasTextPrimary })).toHaveClass(/bg-primary/);
 
-  await expect(page.locator(".badge").filter({ hasText: hasTextPrimary }),)
-  .toHaveClass(/bg-primary/);
+  if (hasTextSuccess) {
+    await expect(page.locator(".badge").filter({ hasText: hasTextSuccess })).toHaveClass(/bg-success/);
+  }
 }
 
 let search: SearchPage;
