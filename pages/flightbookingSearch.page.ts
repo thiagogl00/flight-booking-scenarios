@@ -17,21 +17,21 @@ export class SearchPage {
 		this.page = page;
 	}
 
-	async searchFlight(options: FlightSearchOptions) {
-		if (options.oneWay) {
+	async searchFlight(obj: FlightSearchOptions) {
+		if (obj.oneWay) {
 			await this.page.getByTestId("flight-one-way").click();
 		}
 
-		await this.page.selectOption('[data-testid="flight-from"]', options.from);
-		await this.page.selectOption('[data-testid="flight-to"]', options.to);
-		await this.page.getByTestId("flight-departure-date").fill(options.departureDate);
+		await this.page.selectOption('[data-testid="flight-from"]', obj.from);
+		await this.page.selectOption('[data-testid="flight-to"]', obj.to);
+		await this.page.getByTestId("flight-departure-date").fill(obj.departureDate);
 
-		if (!options.oneWay && options.returnDate) {
-			await this.page.getByTestId("flight-return-date").fill(options.returnDate);
+		if (!obj.oneWay && obj.returnDate) {
+			await this.page.getByTestId("flight-return-date").fill(obj.returnDate);
 		}
 
-		await this.page.getByTestId("flight-passengers").fill(options.passengers);
-		await this.page.selectOption('[data-testid="flight-class"]',options.flightClass);
+		await this.page.getByTestId("flight-passengers").fill(obj.passengers);
+		await this.page.selectOption('[data-testid="flight-class"]',obj.flightClass);
 		await this.page.getByTestId("flight-search").click();
 	}
 
