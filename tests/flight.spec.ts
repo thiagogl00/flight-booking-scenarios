@@ -116,7 +116,7 @@ test.describe("Search", () => {
   // Matheus S
   test("Origem e destino iguais devem ser rejeitados", async ({ page }) => {
     // 1. Preenche os campos de busca com origem e destino iguais
-    await search.reject({
+    await search.searchFlight({
       from: "Paris",
       to: "Paris",
       departureDate: "2026-10-26",
@@ -135,7 +135,7 @@ test.describe("Search", () => {
 //Thiago
   test("Data de ida não pode ser maior ou igual a da volta", async ({ page }) => {
     // preenche os campos de busca com a data de ida maior que a de volta
-    await search.reject({
+    await search.searchFlight({
       from: "Paris",
       to: "London",
       departureDate: "2026-11-01",
@@ -148,7 +148,7 @@ test.describe("Search", () => {
     await expect(page.getByText("Return date must be after departure date.", {exact: true})).toBeVisible();
 
     // preenche os campos de busca com a data de ida igual a da volta
-    await search.reject({
+    await search.searchFlight({
       from: "Paris",
       to: "London",
       departureDate: "2026-11-01",
@@ -164,7 +164,7 @@ test.describe("Search", () => {
 //Franciele
   test("Exibir mensagens de erro com todos os campos vazios", async ({ page }) => {
     // preenche os campos de busca com todos os campos vazios
-    await search.reject({
+    await search.searchFlight({
       from: "",
       to: "",
       departureDate: "",
